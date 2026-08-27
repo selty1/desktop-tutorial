@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="영단어 암기">
+<meta name="theme-color" content="#3a5ba0">
+<title>Lesson 1 영단어 암기장</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1c2333; --sub:#6b7280;
+    --brand:#3a5ba0; --brand-dark:#2c4478; --ok:#1a9e6b; --bad:#d64545;
+    --line:#e3e7f0; --chip:#eef1fa;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    -webkit-text-size-adjust:100%;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:16px 16px 40px;}
+  h1{font-size:1.3rem; margin:6px 0 2px;}
+  h2{font-size:1.05rem; margin:0 0 10px;}
+  .muted{color:var(--sub); font-size:0.85rem;}
+  .card{background:var(--card); border-radius:16px; padding:18px; margin-bottom:14px; box-shadow:0 1px 3px rgba(20,30,60,0.06);}
+  button{font-family:inherit; cursor:pointer;}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    border:none; border-radius:12px; padding:14px 16px; font-size:1rem; font-weight:600;
+    background:var(--brand); color:#fff; width:100%; -webkit-tap-highlight-color:transparent;
+  }
+  .btn:active{background:var(--brand-dark);}
+  .btn.secondary{background:var(--chip); color:var(--brand-dark);}
+  .btn.ghost{background:transparent; color:var(--brand); border:1.5px solid var(--brand);}
+  .btn.sm{padding:9px 12px; font-size:0.85rem; width:auto; border-radius:10px; font-weight:600;}
+  .row{display:flex; gap:10px;}
+  .row > *{flex:1;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .chip-btn{
+    background:var(--chip); border:1.5px solid transparent; border-radius:10px;
+    padding:10px 6px; font-size:0.82rem; font-weight:600; color:var(--brand-dark); text-align:center;
+  }
+  .chip-btn.active{border-color:var(--brand); background:#e4ecfb;}
+  .field-label{font-size:0.8rem; color:var(--sub); margin-bottom:6px; font-weight:600;}
+  input[type=number], input[type=text]{
+    width:100%; padding:12px; font-size:16px; border-radius:10px; border:1.5px solid var(--line);
+    background:#fbfcfe; color:var(--ink);
+  }
+  input[type=number]:focus, input[type=text]:focus{outline:none; border-color:var(--brand);}
+  .mode-option{
+    display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:12px;
+    border:1.5px solid var(--line); margin-bottom:8px;
+  }
+  .mode-option.active{border-color:var(--brand); background:#eef2fc;}
+  .mode-option input{margin-top:3px;}
+  .mode-title{font-weight:700; font-size:0.95rem;}
+  .mode-desc{font-size:0.8rem; color:var(--sub); margin-top:2px;}
+  .toggle-row{display:flex; align-items:center; justify-content:space-between; padding:10px 4px;}
+  .progressbar{background:var(--line); border-radius:20px; height:10px; overflow:hidden;}
+  .progressbar > div{background:var(--ok); height:100%; transition:width .25s;}
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center; margin-top:10px;}
+  .stat-box{background:var(--chip); border-radius:10px; padding:8px 4px;}
+  .stat-num{font-size:1.15rem; font-weight:800; color:var(--brand-dark);}
+  .stat-label{font-size:0.72rem; color:var(--sub);}
+  #screen-study{display:none;}
+  #screen-result{display:none;}
+  .top-study-bar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .top-study-bar .score{font-size:0.85rem; font-weight:700;}
+  .score .ok{color:var(--ok);}
+  .score .bad{color:var(--bad);}
+  .flashcard{
+    background:linear-gradient(160deg,#3a5ba0,#2c4478); color:#fff; border-radius:20px;
+    min-height:230px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px; text-align:center; margin-bottom:16px;
+  }
+  .flashcard .fc-word{font-size:1.9rem; font-weight:800; word-break:break-word;}
+  .flashcard .fc-pos{font-size:0.8rem; opacity:0.75; margin-top:6px;}
+  .flashcard .fc-hint{margin-top:14px; font-size:0.78rem; opacity:0.7;}
+  .flashcard .fc-back{display:none; margin-top:16px; border-top:1px solid rgba(255,255,255,0.25); padding-top:14px; width:100%;}
+  .flashcard.flipped .fc-back{display:block;}
+  .fc-back-row{font-size:0.95rem; margin:4px 0;}
+  .fc-back-row b{font-weight:700;}
+  .question-text{font-size:1.15rem; font-weight:700; margin-bottom:16px; line-height:1.4;}
+  .mc-option{
+    display:block; width:100%; text-align:left; padding:14px; margin-bottom:10px;
+    border-radius:12px; border:1.5px solid var(--line); background:#fff; font-size:1rem;
+  }
+  .mc-option.correct{border-color:var(--ok); background:#e5f7ee; color:var(--ok);}
+  .mc-option.wrong{border-color:var(--bad); background:#fbe9e9; color:var(--bad);}
+  .exam-field{margin-bottom:12px;}
+  .exam-field label{font-size:0.82rem; color:var(--sub); font-weight:600; display:block; margin-bottom:5px;}
+  .exam-feedback{font-size:0.82rem; margin-top:4px; font-weight:600;}
+  .exam-feedback.ok{color:var(--ok);}
+  .exam-feedback.bad{color:var(--bad);}
+  .word-list-item{display:flex; justify-content:space-between; padding:8px 4px; border-bottom:1px solid var(--line); font-size:0.9rem;}
+  .word-list-item:last-child{border-bottom:none;}
+  .hidden{display:none !important;}
+  .footer-note{font-size:0.75rem; color:var(--sub); text-align:center; margin-top:18px; line-height:1.6;}
+  details summary{cursor:pointer; font-weight:600; color:var(--brand-dark); font-size:0.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== HOME ===== -->
+  <div id="screen-home">
+    <h1>📘 Lesson 1 영단어 암기장</h1>
+    <p class="muted">한광고2 26년 2학기 1차 지필평가 · 능률 Lesson1 (1~99)</p>
+
+    <div class="card">
+      <h2>전체 진행률</h2>
+      <div class="progressbar"><div id="overallBar" style="width:0%"></div></div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num" id="statMastered">0</div><div class="stat-label">암기 완료</div></div>
+        <div class="stat-box"><div class="stat-num" id="statLearning">0</div><div class="stat-label">학습중</div></div>
+        <div class="stat-box"><div class="stat-num" id="statNew">0</div><div class="stat-label">미학습</div></div>
+      </div>
+    </div>
+
+    <div id="resumeCard" class="card hidden">
+      <h2>이어서 학습하기</h2>
+      <p class="muted" id="resumeInfo"></p>
+      <div class="row">
+        <button class="btn" id="btnResume">이어하기</button>
+        <button class="btn secondary" id="btnDiscardResume">새로 시작</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>1. 어디부터 외울까요?</h2>
+      <div class="grid3" id="quickRanges">
+        <button class="chip-btn" data-from="1" data-to="33">1~33<br><span class="muted" style="font-size:0.68rem">1교시분</span></button>
+        <button class="chip-btn" data-from="34" data-to="66">34~66<br><span class="muted" style="font-size:0.68rem">2교시분</span></button>
+        <button class="chip-btn" data-from="67" data-to="99">67~99<br><span class="muted" style="font-size:0.68rem">3교시분</span></button>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="chip-btn" style="width:100%" data-from="1" data-to="99">전체 (1~99)</button>
+      </div>
+      <div class="grid2" style="margin-top:12px;">
+        <div>
+          <div class="field-label">시작 번호</div>
+          <input type="number" id="rangeFrom" min="1" max="99" value="1">
+        </div>
+        <div>
+          <div class="field-label">끝 번호</div>
+          <input type="number" id="rangeTo" min="1" max="99" value="33">
+        </div>
+      </div>
+      <div class="toggle-row">
+        <span>아직 못 외운 단어만 출제</span>
+        <input type="checkbox" id="reviewOnly">
+      </div>
+      <div class="toggle-row">
+        <span>순서 섞기</span>
+        <input type="checkbox" id="shuffleOn" checked>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. 어떤 방식으로 외울까요?</h2>
+      <label class="mode-option" data-mode="flashcard">
+        <input type="radio" name="mode" value="flashcard" checked>
+        <div><div class="mode-title">🃏 플래시카드</div><div class="mode-desc">단어를 보고 뜻·동의어·반의어를 떠올린 뒤 카드를 넘겨 확인해요.</div></div>
+      </label>
+      <label class="mode-option" data-mode="mc">
+        <input type="radio" name="mode" value="mc">
+        <div><div class="mode-title">✅ 객관식</div><div class="mode-desc">뜻, 단어, 동의어, 반의어를 4지선다로 골라요.</div></div>
+      </label>
+      <label class="mode-option" data-mode="typing">
+        <input type="radio" name="mode" value="typing">
+        <div><div class="mode-title">⌨️ 주관식(스펠링)</div><div class="mode-desc">뜻을 보고 영단어·동의어·반의어를 직접 입력해요.</div></div>
+      </label>
+      <label class="mode-option" data-mode="exam">
+        <input type="radio" name="mode" value="exam">
+        <div><div class="mode-title">📝 실전 시험 모드</div><div class="mode-desc">뜻만 보고 단어 + 동의어 + 반의어 3개를 한번에 작성해요 (실제 시험 형식).</div></div>
+      </label>
+    </div>
+
+    <button class="btn" id="btnStart" style="font-size:1.05rem; padding:16px;">학습 시작하기</button>
+
+    <div class="footer-note">
+      <details>
+        <summary>사용 팁 (아이패드)</summary>
+        <p style="text-align:left;">
+        · Safari 공유 버튼 → "홈 화면에 추가"를 하면 앱처럼 아이콘으로 바로 실행돼요.<br>
+        · 학습 기록과 진행률은 이 브라우저(기기)에 자동 저장되어 앱을 껐다 켜도 그대로 남아요.<br>
+        · 브라우저 데이터/기록을 지우면 저장된 진행률도 함께 사라져요.
+        </p>
+      </details>
+      <button class="btn ghost sm" id="btnResetAll" style="margin-top:10px;">전체 진행률 초기화</button>
+    </div>
+  </div>
+
+  <!-- ===== STUDY ===== -->
+  <div id="screen-study">
+    <div class="top-study-bar">
+      <button class="btn secondary sm" id="btnExitStudy">← 나가기</button>
+      <div class="score"><span id="qIndex">1</span> / <span id="qTotal">0</span>
+        &nbsp;·&nbsp;<span class="ok" id="scoreOk">0</span>정답 <span class="bad" id="scoreBad">0</span>오답</div>
+    </div>
+    <div class="progressbar" style="margin-bottom:16px;"><div id="studyBar" style="width:0%"></div></div>
+    <div id="studyArea"></div>
+  </div>
+
+  <!-- ===== RESULT ===== -->
+  <div id="screen-result">
+    <div class="card">
+      <h2>학습 결과</h2>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num" id="resTotal">0</div><div class="stat-label">전체</div></div>
+        <div class="stat-box"><div class="stat-num" id="resOk">0</div><div class="stat-label">정답</div></div>
+        <div class="stat-box"><div class="stat-num" id="resBad">0</div><div class="stat-label">오답</div></div>
+      </div>
+    </div>
+    <div class="card" id="wrongCard">
+      <h2>틀린 단어</h2>
+      <div id="wrongList"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="btnRetryWrong">틀린 단어만 다시</button>
+      <button class="btn secondary" id="btnBackHome">처음 화면으로</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= DATA ================= */
+const VOCAB = [
+{no:1,word:"figure",meaning:"사람, 인물",pos:"명사",syn:"person",ant:null},
+{no:2,word:"emerge",meaning:"나타나다, 나오다",pos:"동사",syn:"appear",ant:"disappear"},
+{no:3,word:"fiercely",meaning:"사납게, 맹렬하게",pos:"부사",syn:"violently",ant:"mildly"},
+{no:4,word:"despair",meaning:"절망",pos:"명사",syn:"hopelessness",ant:"hope"},
+{no:5,word:"ruin",meaning:"망치다, 파괴하다",pos:"동사",syn:"destroy",ant:"restore"},
+{no:6,word:"widespread",meaning:"널리 퍼진",pos:"형용사",syn:"prevalent",ant:"limited"},
+{no:7,word:"suffer",meaning:"고통받다",pos:"동사",syn:"undergo",ant:"enjoy"},
+{no:8,word:"deadly",meaning:"치명적인",pos:"형용사",syn:"fatal",ant:"harmless"},
+{no:9,word:"collect",meaning:"수집하다",pos:"동사",syn:"gather",ant:"distribute"},
+{no:10,word:"sample",meaning:"표본, 견본",pos:"명사",syn:"specimen",ant:null},
+{no:11,word:"faint",meaning:"희미한",pos:"형용사",syn:"dim",ant:"bright"},
+{no:12,word:"tragic",meaning:"비극적인",pos:"형용사",syn:"disastrous",ant:"fortunate"},
+{no:13,word:"desperate",meaning:"절망적인, 필사적인",pos:"형용사",syn:"hopeless",ant:"hopeful"},
+{no:14,word:"unemployed",meaning:"실직한",pos:"형용사",syn:"jobless",ant:"employed"},
+{no:15,word:"uncontrollably",meaning:"통제할 수 없게",pos:"부사",syn:"irresistibly",ant:"controllably"},
+{no:16,word:"barely",meaning:"간신히, 거의 ~않게",pos:"부사",syn:"hardly",ant:"easily"},
+{no:17,word:"breathe",meaning:"숨 쉬다",pos:"동사",syn:"respire",ant:"suffocate"},
+{no:18,word:"characterize",meaning:"특징짓다",pos:"동사",syn:"distinguish",ant:null},
+{no:19,word:"difficulty",meaning:"어려움",pos:"명사",syn:"hardship",ant:"ease"},
+{no:20,word:"distinct",meaning:"뚜렷한, 독특한",pos:"형용사",syn:"clear",ant:"indistinct"},
+{no:21,word:"illness",meaning:"질병",pos:"명사",syn:"disease",ant:"health"},
+{no:22,word:"terror",meaning:"공포",pos:"명사",syn:"fear",ant:"courage"},
+{no:23,word:"contract",meaning:"(병에) 걸리다",pos:"동사",syn:"catch",ant:"avoid"},
+{no:24,word:"average",meaning:"평균",pos:"명사",syn:"mean",ant:null},
+{no:25,word:"identify",meaning:"확인하다, 식별하다",pos:"동사",syn:"recognize",ant:"overlook"},
+{no:26,word:"vaccine",meaning:"백신",pos:"명사",syn:"immunization",ant:null},
+{no:27,word:"develop",meaning:"개발하다",pos:"동사",syn:"create",ant:"destroy"},
+{no:28,word:"ineffective",meaning:"효과가 없는",pos:"형용사",syn:"useless",ant:"effective"},
+{no:29,word:"researcher",meaning:"연구자",pos:"명사",syn:"scientist",ant:null},
+{no:30,word:"effort",meaning:"노력",pos:"명사",syn:"attempt",ant:null},
+{no:31,word:"fruitless",meaning:"성과 없는",pos:"형용사",syn:"unsuccessful",ant:"fruitful"},
+{no:32,word:"bacteriology",meaning:"세균학",pos:"명사",syn:null,ant:null},
+{no:33,word:"recruit",meaning:"모집하다, 채용하다",pos:"동사",syn:"hire",ant:"dismiss"},
+{no:34,word:"department",meaning:"부서",pos:"명사",syn:"division",ant:null},
+{no:35,word:"bond",meaning:"유대감을 형성하다",pos:"동사",syn:"connect",ant:"separate"},
+{no:36,word:"personal",meaning:"개인적인",pos:"형용사",syn:"individual",ant:"public"},
+{no:37,word:"experience",meaning:"경험",pos:"명사",syn:"encounter",ant:"inexperience"},
+{no:38,word:"severe",meaning:"심각한, 극심한",pos:"형용사",syn:"serious",ant:"mild"},
+{no:39,word:"promote",meaning:"촉진하다, 증진하다",pos:"동사",syn:"encourage",ant:"discourage"},
+{no:40,word:"funding",meaning:"자금 지원",pos:"명사",syn:"financing",ant:null},
+{no:41,word:"limited",meaning:"제한된",pos:"형용사",syn:"restricted",ant:"unlimited"},
+{no:42,word:"payment",meaning:"지불, 보수",pos:"명사",syn:"compensation",ant:null},
+{no:43,word:"enthusiastic",meaning:"열정적인",pos:"형용사",syn:"passionate",ant:"indifferent"},
+{no:44,word:"persist",meaning:"지속하다, 끈질기게 계속하다",pos:"동사",syn:"persevere",ant:"quit"},
+{no:45,word:"goal",meaning:"목표",pos:"명사",syn:"objective",ant:null},
+{no:46,word:"relieve",meaning:"완화하다, 덜어 주다",pos:"동사",syn:"ease",ant:"aggravate"},
+{no:47,word:"innocent",meaning:"무고한, 죄 없는",pos:"형용사",syn:"guiltless",ant:"guilty"},
+{no:48,word:"bacteria",meaning:"박테리아, 세균",pos:"명사",syn:"germs",ant:null},
+{no:49,word:"support",meaning:"지원하다",pos:"동사",syn:"assist",ant:"oppose"},
+{no:50,word:"patient",meaning:"환자",pos:"명사",syn:"sufferer",ant:null},
+{no:51,word:"cough",meaning:"기침하다, 기침",pos:"동사/명사",syn:"hack",ant:null},
+{no:52,word:"incubator",meaning:"배양기",pos:"명사",syn:null,ant:null},
+{no:53,word:"colony",meaning:"군집, 세균 집락",pos:"명사",syn:"group",ant:null},
+{no:54,word:"analyze",meaning:"분석하다",pos:"동사",syn:"examine",ant:"ignore"},
+{no:55,word:"dreadful",meaning:"끔찍한",pos:"형용사",syn:"terrible",ant:"wonderful"},
+{no:56,word:"victim",meaning:"희생자",pos:"명사",syn:"sufferer",ant:null},
+{no:57,word:"urgent",meaning:"긴급한",pos:"형용사",syn:"pressing",ant:"unimportant"},
+{no:58,word:"potential",meaning:"잠재적인",pos:"형용사",syn:"possible",ant:"actual"},
+{no:59,word:"clinical",meaning:"임상의",pos:"형용사",syn:"medical",ant:null},
+{no:60,word:"trial",meaning:"시험, 실험",pos:"명사",syn:"test",ant:null},
+{no:61,word:"subject",meaning:"실험 대상",pos:"명사",syn:"participant",ant:null},
+{no:62,word:"negative",meaning:"부정적인",pos:"형용사",syn:"unfavorable",ant:"positive"},
+{no:63,word:"side effect",meaning:"부작용",pos:"명사",syn:"adverse effect",ant:"benefit"},
+{no:64,word:"inject",meaning:"주사하다",pos:"동사",syn:"administer",ant:"withdraw"},
+{no:65,word:"confirm",meaning:"확인하다",pos:"동사",syn:"verify",ant:"deny"},
+{no:66,word:"conduct",meaning:"실시하다, 수행하다",pos:"동사",syn:"carry out",ant:"abandon"},
+{no:67,word:"apparent",meaning:"명백한, 분명한",pos:"형용사",syn:"evident",ant:"unclear"},
+{no:68,word:"effectiveness",meaning:"효과, 효능",pos:"명사",syn:"efficacy",ant:"ineffectiveness"},
+{no:69,word:"expand",meaning:"확대하다",pos:"동사",syn:"enlarge",ant:"reduce"},
+{no:70,word:"proceed",meaning:"진행하다",pos:"동사",syn:"continue",ant:"stop"},
+{no:71,word:"secure",meaning:"확보하다",pos:"동사",syn:"obtain",ant:"lose"},
+{no:72,word:"large-scale",meaning:"대규모의",pos:"형용사",syn:"extensive",ant:"small-scale"},
+{no:73,word:"immunity",meaning:"면역력",pos:"명사",syn:"resistance",ant:"susceptibility"},
+{no:74,word:"distribute",meaning:"배포하다, 분배하다",pos:"동사",syn:"deliver",ant:"collect"},
+{no:75,word:"dramatically",meaning:"극적으로",pos:"부사",syn:"significantly",ant:"slightly"},
+{no:76,word:"decline",meaning:"감소, 감소하다",pos:"명사/동사",syn:"decrease",ant:"increase"},
+{no:77,word:"infection",meaning:"감염",pos:"명사",syn:"contagion",ant:null},
+{no:78,word:"patent",meaning:"특허를 내다, 특허",pos:"동사/명사",syn:null,ant:null},
+{no:79,word:"wealthy",meaning:"부유한",pos:"형용사",syn:"rich",ant:"poor"},
+{no:80,word:"contribution",meaning:"기여",pos:"명사",syn:"assistance",ant:"hindrance"},
+{no:81,word:"reveal",meaning:"밝히다, 드러내다",pos:"동사",syn:"disclose",ant:"conceal"},
+{no:82,word:"remarkable",meaning:"놀라운, 주목할 만한",pos:"형용사",syn:"extraordinary",ant:"ordinary"},
+{no:83,word:"modest",meaning:"겸손한",pos:"형용사",syn:"humble",ant:"arrogant"},
+{no:84,word:"reward",meaning:"보상",pos:"명사",syn:"compensation",ant:"punishment"},
+{no:85,word:"cutting-edge",meaning:"최첨단의",pos:"형용사",syn:"advanced",ant:"outdated"},
+{no:86,word:"enhance",meaning:"향상시키다",pos:"동사",syn:"improve",ant:"weaken"},
+{no:87,word:"cast",meaning:"출연진",pos:"명사",syn:"actors",ant:null},
+{no:88,word:"employ",meaning:"사용하다, 고용하다",pos:"동사",syn:"use",ant:"dismiss"},
+{no:89,word:"corporate",meaning:"기업의",pos:"형용사",syn:"business",ant:"individual"},
+{no:90,word:"responsibility",meaning:"책임",pos:"명사",syn:"duty",ant:"irresponsibility"},
+{no:91,word:"desirable",meaning:"바람직한",pos:"형용사",syn:"preferable",ant:"undesirable"},
+{no:92,word:"impact",meaning:"영향",pos:"명사",syn:"effect",ant:null},
+{no:93,word:"community",meaning:"지역사회",pos:"명사",syn:"society",ant:null},
+{no:94,word:"volunteer",meaning:"자원봉사하다, 자원봉사자",pos:"동사/명사",syn:"offer",ant:null},
+{no:95,word:"shelter",meaning:"보호소",pos:"명사",syn:"refuge",ant:null},
+{no:96,word:"abandon",meaning:"버리다, 유기하다",pos:"동사",syn:"desert",ant:"keep"},
+{no:97,word:"rescue",meaning:"구조하다",pos:"동사",syn:"save",ant:"abandon"},
+{no:98,word:"fulfillment",meaning:"성취감, 만족감",pos:"명사",syn:"satisfaction",ant:"dissatisfaction"},
+{no:99,word:"welfare",meaning:"복지, 행복",pos:"명사",syn:"well-being",ant:null},
+];
+const VOCAB_BY_NO = {}; VOCAB.forEach(w=>VOCAB_BY_NO[w.no]=w);
+
+/* ================= STORAGE ================= */
+const LS_PROGRESS = "vocabApp.progress.v1";
+const LS_SETTINGS = "vocabApp.settings.v1";
+const LS_SESSION  = "vocabApp.session.v1";
+
+function loadJSON(key, fallback){
+  try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){/* storage unavailable */}
+}
+
+let progress = loadJSON(LS_PROGRESS, {});      // { [no]: {seen,correct,wrong,streak,mastered} }
+let settings = loadJSON(LS_SETTINGS, {from:1,to:33,mode:"flashcard",reviewOnly:false,shuffle:true});
+let session  = loadJSON(LS_SESSION, null);     // active/paused study session
+
+function getProg(no){
+  return progress[no] || {seen:0,correct:0,wrong:0,streak:0,mastered:false};
+}
+function updateProgress(no, isCorrect){
+  const p = getProg(no);
+  p.seen++;
+  if(isCorrect){ p.correct++; p.streak++; if(p.streak>=3) p.mastered=true; }
+  else { p.wrong++; p.streak=0; p.mastered=false; }
+  progress[no]=p;
+  saveJSON(LS_PROGRESS, progress);
+}
+
+/* ================= UTIL ================= */
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function normalize(s){ return (s||"").trim().toLowerCase().replace(/\s+/g," "); }
+function pick(arr,n){ return shuffle(arr).slice(0,n); }
+function $(sel){ return document.querySelector(sel); }
+function $all(sel, scope){ return Array.from((scope||document).querySelectorAll(sel)); }
+function show(id){ ["screen-home","screen-study","screen-result"].forEach(s=>{
+  $("#"+s).style.display = (s===id) ? "block" : "none";
+}); }
+
+/* ================= HOME SCREEN ================= */
+function renderHomeStats(){
+  let mastered=0, learning=0, fresh=0;
+  VOCAB.forEach(w=>{
+    const p = getProg(w.no);
+    if(p.mastered) mastered++;
+    else if(p.seen>0) learning++;
+    else fresh++;
+  });
+  $("#statMastered").textContent = mastered;
+  $("#statLearning").textContent = learning;
+  $("#statNew").textContent = fresh;
+  $("#overallBar").style.width = Math.round(mastered/VOCAB.length*100)+"%";
+}
+
+function renderResumeCard(){
+  if(session && session.queue && session.pointer < session.queue.length){
+    $("#resumeCard").classList.remove("hidden");
+    const modeLabel = {flashcard:"플래시카드",mc:"객관식",typing:"주관식",exam:"실전 시험"}[session.mode] || session.mode;
+    $("#resumeInfo").textContent =
+      `${modeLabel} · ${session.pointer}/${session.queue.length}문제 진행됨 (정답 ${session.correct} / 오답 ${session.wrong})`;
+  } else {
+    $("#resumeCard").classList.add("hidden");
+  }
+}
+
+function applySettingsToForm(){
+  $("#rangeFrom").value = settings.from;
+  $("#rangeTo").value = settings.to;
+  $("#reviewOnly").checked = !!settings.reviewOnly;
+  $("#shuffleOn").checked = settings.shuffle !== false;
+  $all('input[name="mode"]').forEach(r=>{
+    r.checked = (r.value === settings.mode);
+    r.closest(".mode-option").classList.toggle("active", r.checked);
+  });
+}
+
+$("#quickRanges").addEventListener("click", handleQuickRangeClick);
+$all(".chip-btn[data-from]").forEach(b=>{
+  if(b.parentElement.id !== "quickRanges"){ b.addEventListener("click", handleQuickRangeClick); }
+});
+function handleQuickRangeClick(e){
+  const btn = e.target.closest(".chip-btn");
+  if(!btn) return;
+  $("#rangeFrom").value = btn.dataset.from;
+  $("#rangeTo").value = btn.dataset.to;
+}
+
+$all('input[name="mode"]').forEach(r=>{
+  r.addEventListener("change", ()=>{
+    $all(".mode-option").forEach(m=>m.classList.remove("active"));
+    r.closest(".mode-option").classList.add("active");
+  });
+});
+
+$("#btnStart").addEventListener("click", ()=>{
+  let from = parseInt($("#rangeFrom").value,10) || 1;
+  let to = parseInt($("#rangeTo").value,10) || 1;
+  from = Math.max(1, Math.min(99, from));
+  to = Math.max(1, Math.min(99, to));
+  if(from>to){ const t=from; from=to; to=t; }
+  const mode = $('input[name="mode"]:checked').value;
+  const reviewOnly = $("#reviewOnly").checked;
+  const shuffleOn = $("#shuffleOn").checked;
+
+  settings = {from,to,mode,reviewOnly,shuffle:shuffleOn};
+  saveJSON(LS_SETTINGS, settings);
+
+  let words = VOCAB.filter(w=>w.no>=from && w.no<=to);
+  if(reviewOnly) words = words.filter(w=>!getProg(w.no).mastered);
+  if(words.length===0){
+    alert(reviewOnly ? "선택한 범위에 아직 못 외운 단어가 없어요! 축하합니다 🎉" : "선택한 범위에 단어가 없어요.");
+    return;
+  }
+  const queue = (shuffleOn ? shuffle(words) : words).map(w=>w.no);
+  session = {mode, queue, pointer:0, correct:0, wrong:0, wrongNos:[]};
+  saveJSON(LS_SESSION, session);
+  startStudyUI();
+});
+
+$("#btnResume").addEventListener("click", ()=>{ if(session) startStudyUI(); });
+$("#btnDiscardResume").addEventListener("click", ()=>{
+  session = null; saveJSON(LS_SESSION, null); renderResumeCard();
+});
+$("#btnResetAll").addEventListener("click", ()=>{
+  if(confirm("모든 암기 진행률을 초기화할까요? 이 작업은 되돌릴 수 없어요.")){
+    progress = {}; saveJSON(LS_PROGRESS, progress);
+    session = null; saveJSON(LS_SESSION, null);
+    renderHomeStats(); renderResumeCard();
+  }
+});
+
+/* ================= STUDY SCREEN ================= */
+function startStudyUI(){
+  show("screen-study");
+  renderStudyStep();
+}
+
+function currentWord(){
+  const no = session.queue[session.pointer];
+  return VOCAB_BY_NO[no];
+}
+
+function updateStudyHeader(){
+  $("#qIndex").textContent = Math.min(session.pointer+1, session.queue.length);
+  $("#qTotal").textContent = session.queue.length;
+  $("#scoreOk").textContent = session.correct;
+  $("#scoreBad").textContent = session.wrong;
+  $("#studyBar").style.width = Math.round(session.pointer/session.queue.length*100)+"%";
+}
+
+function persistSession(){ saveJSON(LS_SESSION, session); }
+
+function finishAnswer(no, isCorrect){
+  updateProgress(no, isCorrect);
+  if(isCorrect) session.correct++; else { session.wrong++; if(session.wrongNos.indexOf(no)===-1) session.wrongNos.push(no); }
+}
+
+function nextQuestion(){
+  session.pointer++;
+  persistSession();
+  if(session.pointer >= session.queue.length){
+    endSession();
+  } else {
+    renderStudyStep();
+  }
+}
+
+function endSession(){
+  $("#resTotal").textContent = session.queue.length;
+  $("#resOk").textContent = session.correct;
+  $("#resBad").textContent = session.wrong;
+  const wrongList = $("#wrongList");
+  wrongList.innerHTML = "";
+  if(session.wrongNos.length===0){
+    $("#wrongCard").classList.add("hidden");
+  } else {
+    $("#wrongCard").classList.remove("hidden");
+    session.wrongNos.forEach(no=>{
+      const w = VOCAB_BY_NO[no];
+      const div = document.createElement("div");
+      div.className = "word-list-item";
+      div.innerHTML = `<span><b>${w.word}</b></span><span class="muted">${w.meaning}</span>`;
+      wrongList.appendChild(div);
+    });
+  }
+  const finishedWrongNos = session.wrongNos.slice();
+  saveJSON(LS_SESSION, null);
+  session._finishedWrongNos = finishedWrongNos;
+  show("screen-result");
+  renderHomeStats();
+}
+
+$("#btnExitStudy").addEventListener("click", ()=>{
+  persistSession();
+  show("screen-home");
+  renderHomeStats(); renderResumeCard();
+});
+
+$("#btnBackHome").addEventListener("click", ()=>{
+  show("screen-home");
+  renderHomeStats(); renderResumeCard();
+});
+
+$("#btnRetryWrong").addEventListener("click", ()=>{
+  const wrongNos = session._finishedWrongNos || [];
+  if(wrongNos.length===0){ show("screen-home"); renderHomeStats(); renderResumeCard(); return; }
+  session = {mode: session.mode, queue: shuffle(wrongNos), pointer:0, correct:0, wrong:0, wrongNos:[]};
+  saveJSON(LS_SESSION, session);
+  startStudyUI();
+});
+
+/* ---- Question renderers ---- */
+function renderStudyStep(){
+  updateStudyHeader();
+  const w = currentWord();
+  const area = $("#studyArea");
+  area.innerHTML = "";
+  if(session.mode === "flashcard") renderFlashcard(area, w);
+  else if(session.mode === "mc") renderMC(area, w);
+  else if(session.mode === "typing") renderTyping(area, w);
+  else if(session.mode === "exam") renderExam(area, w);
+}
+
+// -- Flashcard --
+function renderFlashcard(area, w){
+  const card = document.createElement("div");
+  card.className = "flashcard";
+  card.innerHTML = `
+    <div class="fc-word">${w.word}</div>
+    <div class="fc-pos">${w.pos}</div>
+    <div class="fc-hint">탭하면 뜻이 보여요</div>
+    <div class="fc-back">
+      <div class="fc-back-row"><b>뜻</b> · ${w.meaning}</div>
+      <div class="fc-back-row"><b>동의어</b> · ${w.syn || "없음"}</div>
+      <div class="fc-back-row"><b>반의어</b> · ${w.ant || "없음"}</div>
+    </div>`;
+  card.addEventListener("click", ()=> card.classList.toggle("flipped"));
+  area.appendChild(card);
+
+  const btnRow = document.createElement("div");
+  btnRow.className = "row";
+  btnRow.innerHTML = `
+    <button class="btn secondary" id="fcNo">몰랐어요</button>
+    <button class="btn" id="fcYes">알고 있었어요</button>`;
+  area.appendChild(btnRow);
+  $("#fcNo").addEventListener("click", ()=>{ finishAnswer(w.no,false); nextQuestion(); });
+  $("#fcYes").addEventListener("click", ()=>{ finishAnswer(w.no,true); nextQuestion(); });
+}
+
+// -- Multiple choice --
+function mcSubtypesFor(w){
+  const types = ["meaning","reverse"];
+  if(w.syn) types.push("synonym");
+  if(w.ant) types.push("antonym");
+  return types;
+}
+function renderMC(area, w){
+  const subtype = pick(mcSubtypesFor(w),1)[0];
+  let promptText, correctVal, field;
+  if(subtype==="meaning"){ promptText = `"${w.word}"의 뜻은?`; correctVal = w.meaning; field="meaning"; }
+  else if(subtype==="reverse"){ promptText = `"${w.meaning}"에 해당하는 단어는?`; correctVal = w.word; field="word"; }
+  else if(subtype==="synonym"){ promptText = `"${w.word}"의 동의어(비슷한 말)는?`; correctVal = w.syn; field="syn"; }
+  else { promptText = `"${w.word}"의 반의어(반대말)는?`; correctVal = w.ant; field="ant"; }
+
+  const pool = VOCAB.filter(v=>v.no!==w.no && v[field]);
+  const distractVals = Array.from(new Set(pick(pool,20).map(v=>v[field]))).filter(v=>v!==correctVal).slice(0,3);
+  const options = shuffle([correctVal, ...distractVals]);
+
+  const q = document.createElement("div");
+  q.className = "card";
+  q.innerHTML = `<div class="question-text">${promptText}</div>`;
+  area.appendChild(q);
+
+  const optWrap = document.createElement("div");
+  options.forEach(opt=>{
+    const b = document.createElement("button");
+    b.className = "mc-option";
+    b.textContent = opt;
+    b.addEventListener("click", ()=>{
+      $all(".mc-option", optWrap).forEach(o=>o.disabled=true);
+      const isCorrect = opt===correctVal;
+      b.classList.add(isCorrect?"correct":"wrong");
+      if(!isCorrect){
+        Array.from(optWrap.children).forEach(o=>{ if(o.textContent===correctVal) o.classList.add("correct"); });
+      }
+      finishAnswer(w.no, isCorrect);
+      setTimeout(nextQuestion, isCorrect?450:1100);
+    });
+    optWrap.appendChild(b);
+  });
+  area.appendChild(optWrap);
+}
+
+// -- Typing --
+function typingSubtypesFor(w){
+  const types = ["spell"];
+  if(w.syn) types.push("synonym");
+  if(w.ant) types.push("antonym");
+  return types;
+}
+function renderTyping(area, w){
+  const subtype = pick(typingSubtypesFor(w),1)[0];
+  let promptText, correctVal;
+  if(subtype==="spell"){ promptText = `다음 뜻에 해당하는 영단어를 쓰세요.<br><b>${w.meaning}</b>`; correctVal = w.word; }
+  else if(subtype==="synonym"){ promptText = `"${w.word}" (${w.meaning})의 동의어를 영어로 쓰세요.`; correctVal = w.syn; }
+  else { promptText = `"${w.word}" (${w.meaning})의 반의어를 영어로 쓰세요.`; correctVal = w.ant; }
+
+  const q = document.createElement("div");
+  q.className = "card";
+  q.innerHTML = `
+    <div class="question-text">${promptText}</div>
+    <input type="text" id="typingInput" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="정답 입력">
+    <div class="exam-feedback" id="typingFeedback"></div>
+    <div class="row" style="margin-top:12px;">
+      <button class="btn secondary" id="typingSkip">모르겠어요</button>
+      <button class="btn" id="typingSubmit">확인</button>
+    </div>`;
+  area.appendChild(q);
+
+  const input = $("#typingInput");
+  const feedback = $("#typingFeedback");
+  let answered = false;
+  input.focus();
+
+  function submit(){
+    if(answered) return;
+    const val = input.value;
+    if(!val.trim()) return;
+    answered = true;
+    const isCorrect = normalize(val)===normalize(correctVal);
+    feedback.textContent = isCorrect ? "정답이에요! 🎉" : `오답 · 정답: ${correctVal}`;
+    feedback.className = "exam-feedback " + (isCorrect?"ok":"bad");
+    input.disabled = true;
+    $("#typingSubmit").disabled = true; $("#typingSkip").disabled = true;
+    finishAnswer(w.no, isCorrect);
+    setTimeout(nextQuestion, isCorrect?500:1300);
+  }
+  function skip(){
+    if(answered) return;
+    answered = true;
+    feedback.textContent = `정답: ${correctVal}`;
+    feedback.className = "exam-feedback bad";
+    input.disabled = true;
+    $("#typingSubmit").disabled = true; $("#typingSkip").disabled = true;
+    finishAnswer(w.no, false);
+    setTimeout(nextQuestion, 1300);
+  }
+  $("#typingSubmit").addEventListener("click", submit);
+  $("#typingSkip").addEventListener("click", skip);
+  input.addEventListener("keydown", e=>{ if(e.key==="Enter") submit(); });
+}
+
+// -- Exam mode: meaning given, write word + synonym + antonym --
+function renderExam(area, w){
+  const q = document.createElement("div");
+  q.className = "card";
+  q.innerHTML = `
+    <div class="question-text">다음 뜻(${w.pos})에 맞는 단어와 동의어, 반의어를 쓰세요.<br><b style="font-size:1.25rem;">${w.meaning}</b></div>
+    <div class="exam-field">
+      <label>단어 (word)</label>
+      <input type="text" id="examWord" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <div class="exam-feedback" id="fbWord"></div>
+    </div>
+    <div class="exam-field">
+      <label>동의어 (synonym) ${w.syn?"":"— 이 단어는 동의어가 없어요"}</label>
+      <input type="text" id="examSyn" ${w.syn?"":"disabled placeholder='없음'"} autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <div class="exam-feedback" id="fbSyn"></div>
+    </div>
+    <div class="exam-field">
+      <label>반의어 (antonym) ${w.ant?"":"— 이 단어는 반의어가 없어요"}</label>
+      <input type="text" id="examAnt" ${w.ant?"":"disabled placeholder='없음'"} autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <div class="exam-feedback" id="fbAnt"></div>
+    </div>
+    <button class="btn" id="examSubmit" style="margin-top:8px;">채점하기</button>`;
+  area.appendChild(q);
+
+  $("#examWord").focus();
+  $("#examSubmit").addEventListener("click", ()=>{
+    const btn = $("#examSubmit");
+    if(btn.disabled) return;
+    btn.disabled = true;
+
+    const wordVal = $("#examWord").value;
+    const synVal = $("#examSyn").value;
+    const antVal = $("#examAnt").value;
+
+    const wordOk = normalize(wordVal)===normalize(w.word);
+    const synOk = !w.syn || normalize(synVal)===normalize(w.syn);
+    const antOk = !w.ant || normalize(antVal)===normalize(w.ant);
+
+    setFeedback("fbWord", wordOk, w.word);
+    if(w.syn) setFeedback("fbSyn", synOk, w.syn);
+    if(w.ant) setFeedback("fbAnt", antOk, w.ant);
+
+    $all("input", q).forEach(i=>i.disabled=true);
+
+    const allOk = wordOk && synOk && antOk;
+    finishAnswer(w.no, allOk);
+    setTimeout(nextQuestion, allOk?600:1700);
+  });
+
+  function setFeedback(id, ok, answer){
+    const el = $("#"+id);
+    el.textContent = ok ? "정답 ✅" : `오답 · 정답: ${answer}`;
+    el.className = "exam-feedback " + (ok?"ok":"bad");
+  }
+}
+
+/* ================= INIT ================= */
+function init(){
+  applySettingsToForm();
+  renderHomeStats();
+  renderResumeCard();
+  show("screen-home");
+}
+init();
+
+})();
+</script>
+</body>
+</html>
